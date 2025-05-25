@@ -16,14 +16,20 @@ def get_video_url():
         return jsonify({'error': 'URLがありません'}), 400
 
     ydl_opts = {
-        'format': 'best',
+        'format': 'best[ext=mp4]/best',
         'quiet': True,
         'skip_download': True,
+        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                      'AppleWebKit/537.36 (KHTML, like Gecko) '
+                      'Chrome/113.0.0.0 Safari/537.36'
     }
+
     with YoutubeDL(ydl_opts) as ydl:
         try:
             info = ydl.extract_info(url, download=False)
-            video_url = info['url']
+            video_url = info.get('url')
+            if not video_url:
+                return jsonify({'error': '動画URLが取得できませんでした'}), 500
             return jsonify({'video_url': video_url})
         except Exception as e:
             return jsonify({'error': str(e)}), 500
